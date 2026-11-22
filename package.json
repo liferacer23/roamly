@@ -1,0 +1,51 @@
+{
+  "name": "roamly",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Thoughtful multi-city journeys with timezone-aware itineraries, maps, budgets and permissioned sharing.",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=22.13.0 <23"
+  },
+  "scripts": {
+    "dev": "NEXT_TELEMETRY_DISABLED=1 next dev --hostname 127.0.0.1 --port 3206",
+    "build": "NEXT_TELEMETRY_DISABLED=1 prisma generate && next build",
+    "start": "NEXT_TELEMETRY_DISABLED=1 next start --hostname 127.0.0.1 --port 3206",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings=0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "tsx --env-file-if-exists=.env.test --test --test-concurrency=1 tests/*.test.ts",
+    "test:e2e": "playwright test",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.3",
+    "decimal.js": "10.6.0",
+    "lucide-react": "0.468.0",
+    "luxon": "3.7.2",
+    "maplibre-gl": "5.24.1",
+    "next": "16.2.6",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.4",
+    "@playwright/test": "1.59.1",
+    "@types/luxon": "3.7.6",
+    "@types/node": "22.19.0",
+    "@types/react": "19.2.0",
+    "@types/react-dom": "19.2.0",
+    "eslint": "9.39.4",
+    "prettier": "3.9.9",
+    "prisma": "6.19.3",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.46.3"
+  }
+}

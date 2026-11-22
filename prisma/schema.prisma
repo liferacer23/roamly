@@ -1,0 +1,187 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Workspace {
+  id        String    @id @default(cuid())
+  name      String
+  demo      Boolean   @default(false)
+  expiresAt DateTime?
+  users     User[]
+  sessions  Session[]
+  trips     Trip[]
+  audits    Audit[]
+  createdAt DateTime  @default(now())
+
+  @@index([demo, expiresAt])
+}
+
+model User {
+  id           String    @id @default(cuid())
+  workspaceId  String
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name         String
+  email        String    @unique
+  passwordHash String
+  sessions     Session[]
+}
+
+model Session {
+  id          String    @id @default(cuid())
+  tokenHash   String    @unique
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt   DateTime
+
+  @@index([expiresAt])
+}
+
+model Trip {
+  id             String        @id @default(cuid())
+  workspaceId    String
+  workspace      Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name           String
+  description    String        @default("")
+  startDate      String
+  endDate        String
+  baseCurrency   String        @default("USD")
+  budget         Decimal       @db.Decimal(18, 2)
+  cover          String        @default("japan")
+  status         String        @default("PLANNING")
+  revision       Int           @default(1)
+  shareHash      String?       @unique
+  shareRole      String        @default("VIEWER")
+  shareExpiresAt DateTime?
+  stops          Stop[]
+  expenses       Expense[]
+  reservations   Reservation[]
+  checklist      Checklist[]
+  createdAt      DateTime      @default(now())
+
+  @@index([workspaceId, createdAt, id])
+}
+
+model Stop {
+  id         String     @id @default(cuid())
+  tripId     String
+  trip       Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  city       String
+  country    String
+  timezone   String
+  arrival    String
+  departure  String
+  latitude   Float
+  longitude  Float
+  position   Int
+  activities Activity[]
+
+  @@index([tripId, position])
+}
+
+model Activity {
+  id         String   @id @default(cuid())
+  stopId     String
+  stop       Stop     @relation(fields: [stopId], references: [id], onDelete: Cascade)
+  title      String
+  category   String   @default("EXPERIENCE")
+  localStart String
+  startsAt   DateTime
+  duration   Int
+  latitude   Float?
+  longitude  Float?
+  notes      String   @default("")
+  source     String   @default("MANUAL")
+  createdAt  DateTime @default(now())
+
+  @@index([stopId, startsAt])
+}
+
+model Expense {
+  id              String   @id @default(cuid())
+  tripId          String
+  trip            Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  title           String
+  category        String
+  amount          Decimal  @db.Decimal(18, 2)
+  currency        String
+  date            String
+  rate            Decimal? @db.Decimal(24, 12)
+  rateDate        String?
+  rateSource      String   @default("UNAVAILABLE")
+  convertedAmount Decimal? @db.Decimal(18, 2)
+  idempotencyKey  String
+  createdAt       DateTime @default(now())
+
+  @@unique([tripId, idempotencyKey])
+  @@index([tripId, date])
+}
+
+model Reservation {
+  id        String @id @default(cuid())
+  tripId    String
+  trip      Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  kind      String
+  title     String
+  location  String
+  startsAt  String
+  endsAt    String
+  reference String @default("")
+  notes     String @default("")
+
+  @@index([tripId, startsAt])
+}
+
+model Checklist {
+  id       String  @id @default(cuid())
+  tripId   String
+  trip     Trip    @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  title    String
+  category String
+  done     Boolean @default(false)
+
+  @@index([tripId, done])
+}
+
+model FxRate {
+  id            String   @id @default(cuid())
+  base          String
+  quote         String
+  requestedDate String
+  observedDate  String
+  rate          Decimal  @db.Decimal(24, 12)
+  fetchedAt     DateTime @default(now())
+
+  @@unique([base, quote, requestedDate])
+}
+
+model SearchCache {
+  key       String   @id
+  results   Json
+  expiresAt DateTime
+}
+
+model Audit {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  action      String
+  detail      String
+  createdAt   DateTime  @default(now())
+
+  @@index([workspaceId, createdAt])
+}
+
+model RateLimit {
+  key       String   @id
+  count     Int      @default(1)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}

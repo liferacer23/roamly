@@ -1,0 +1,10 @@
+node_modules
+.next
+pnpm-lock.yaml
+public/pdf.worker.min.mjs
+playwright-report
+test-results
+prisma/migrations
+public/screenshots
+
+next-env.d.ts

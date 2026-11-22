@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+.env*
+!.env.example
+.vercel/
+*.tsbuildinfo
+playwright-report/
+test-results/
+coverage/
+*.log
+.DS_Store
+public/pdf.worker.min.mjs
+*.pdf
+*.xlsx
+*.csv
+!public/sample-statement.csv
